@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             TasaCambioSeeder::class,
             ReservacionesSeeder::class,
             HistorialVentasSeeder::class,
-            ComandasAbiertasSeeder::class,
+            OperacionDeHoySeeder::class,
         ]);
 
         $this->command->newLine();

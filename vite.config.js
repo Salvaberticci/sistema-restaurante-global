@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
 
 // En el servidor la app vive en un subdirectorio (`/sistema-restaurante-global`)
 // y el docroot es la raíz del proyecto, no `public/`. Por eso `base` lleva el
@@ -22,6 +23,15 @@ export default defineConfig({
         : (APACHE ? '/sistema-restaurante-global/public/build/' : `${SUBDIRECTORIO}/build/`),
 
     plugins: [
+        // Tailwind 4 va como plugin de Vite, no por PostCSS.
+        //
+        // Sin esta línea el build termina sin error y genera un CSS con la capa
+        // `theme` y la capa `components` —los `.srg-*` y el `--font-sans`— pero
+        // **vacía la capa `utilities`**: no encuentra las clases que están en los
+        // `.blade.php` y el sitio se sirve entero sin estilos. Es el peor tipo de
+        // fallo, porque nada parece roto: el HTML llega, el CSS llega, el 200
+        // llega. Solo falta la capa que le da forma a todo.
+        tailwindcss(),
         laravel({
             // `admin` se registra en el panel con `->viteTheme(...)`, que es la
             // vía de Filament 3 para cargar un tema propio sin su compilador de

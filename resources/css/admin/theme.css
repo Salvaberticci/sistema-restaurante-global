@@ -22,6 +22,38 @@
 
 @import 'tailwindcss';
 
+/*
+| El modo oscuro de Filament lo decide una clase, no el sistema operativo.
+|
+| Tailwind 4 cambió la variante `dark:` para que siga a `prefers-color-scheme`.
+| Filament hace otra cosa: pone `class="dark"` en `<html>` porque el usuario puede
+| cambiarlo desde el panel sin tocar el sistema. Con la variante por defecto, el
+| panel queda con el texto claro sobre un fondo claro — invisible — y con el
+| tema forzado a oscuro no hay botón que lo arregle.
+|
+| Esta línea devuelve la variante a la clase, que es lo que Filament espera.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+| Las vistas de Filament también tienen que entrar al escaneo.
+|
+| Los componentes del panel —el botón, el campo de texto, la barra lateral, la
+| tabla— están escritos con utilidades de Tailwind dentro de los `.blade.php` del
+| paquete. Si esas vistas no se escanean, Tailwind no genera ninguna de esas
+| clases y el panel se sirve con el HTML pelado: los inputs se estiran de lado a
+| lado, los botones desaparecen y el layout se desarma.
+|
+| Pasa porque `->viteTheme()` **reemplaza** el tema que Filament trae
+| compilado: no se suma, se sustituye. El panel deja de cargar
+| `vendor/filament/filament/dist/theme.css` y queda con lo que genere este
+| archivo. Es un detalle de la documentación de Filament 3.3 que cuesta una tarde
+| si no se sabe, porque el build no falla: sale un CSS más pequeño y la página
+| sigue dando 200.
+*/
+@source '../../../vendor/filament/*/resources/views/**/*.blade.php';
+@source '../../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
 @source '../../../app/Filament/**/*.php';
 @source '../../../resources/views/filament/**/*.blade.php';
 @source '../../../app/Livewire/**/*.php';
