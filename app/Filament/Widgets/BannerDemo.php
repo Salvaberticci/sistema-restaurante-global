@@ -4,7 +4,6 @@ namespace App\Filament\Widgets;
 
 use App\Domain\Mesas\Models\Sucursal;
 use Filament\Widgets\Widget;
-use Illuminate\Contracts\View\View;
 
 /**
  * Aviso de modo demo.

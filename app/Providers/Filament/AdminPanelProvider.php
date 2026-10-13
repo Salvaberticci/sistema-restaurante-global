@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\BannerDemo;
+use App\Filament\Widgets\EstadoSistema;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -39,8 +41,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                \App\Filament\Widgets\BannerDemo::class,
-                \App\Filament\Widgets\EstadoSistema::class,
+                BannerDemo::class,
+                EstadoSistema::class,
                 Widgets\AccountWidget::class,
             ])
             ->middleware([

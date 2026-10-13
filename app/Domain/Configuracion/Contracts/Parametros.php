@@ -2,6 +2,8 @@
 
 namespace App\Domain\Configuracion\Contracts;
 
+use App\Domain\Configuracion\Exceptions\ParametroNoDefinidoException;
+
 /**
  * Parámetros de configuración que no van en el `.env` porque se cambian desde
  * la interfaz mientras el sistema está corriendo, y por eso tienen que quedar
@@ -23,7 +25,7 @@ interface Parametros
 
     public function texto(string $clave, string $porDefecto = ''): string;
 
-    /** @throws \App\Domain\Configuracion\Exceptions\ParametroNoDefinidoException */
+    /** @throws ParametroNoDefinidoException */
     public function exigir(string $clave): mixed;
 
     public function definir(string $clave, mixed $valor, ?int $usuarioId = null): void;

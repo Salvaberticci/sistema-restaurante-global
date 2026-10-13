@@ -117,7 +117,7 @@ class ParametrosSeeder extends Seeder
             );
         }
 
-        $this->command?->newLine();
-        $this->command?->info('Parámetros fiscales cargados. Revisar los marcados como PENDIENTES con un contador.');
+        $this->command->newLine();
+        $this->command->info('Parámetros fiscales cargados. Revisar los marcados como PENDIENTES con un contador.');
     }
 }

@@ -38,7 +38,7 @@ class UsuariosDemoSeeder extends Seeder
         $sucursal = Sucursal::orderBy('id')->first();
 
         if ($sucursal === null) {
-            $this->command?->warn('No hay sucursales: se corre SucursalesSeeder primero.');
+            $this->command->warn('No hay sucursales: se corre SucursalesSeeder primero.');
             $sucursal = Sucursal::create([
                 'nombre' => 'Casa Mango — Sabana',
                 'codigo' => 'SAB',
@@ -68,8 +68,8 @@ class UsuariosDemoSeeder extends Seeder
             $usuario->syncRoles([$datos['rol']]);
         }
 
-        $this->command?->newLine();
-        $this->command?->info('Cuentas de demo listas. Contraseña de todas: '.self::PASSWORD);
+        $this->command->newLine();
+        $this->command->info('Cuentas de demo listas. Contraseña de todas: '.self::PASSWORD);
     }
 
     /** @return array<string, array{email: string, rol: string, nombre: string}> Para el login con accesos directos. */

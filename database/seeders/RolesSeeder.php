@@ -22,9 +22,14 @@ class RolesSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        foreach (Permisos::grupos() as $grupo => $datos) {
+        foreach (Permisos::grupos() as $datos) {
             foreach ($datos['permisos'] as $permiso) {
-                Permission::findOrCreate($permiso, 'web', $grupo);
+                // La tabla de permisos de Spatie solo tiene nombre y guard. El
+                // grupo con el que se muestra en el panel sale de
+                // Permisos::grupos(), no de una columna.
+                if (! Permission::query()->where('name', $permiso)->where('guard_name', 'web')->exists()) {
+                    Permission::create(['name' => $permiso, 'guard_name' => 'web']);
+                }
             }
         }
 
@@ -38,8 +43,8 @@ class RolesSeeder extends Seeder
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $this->command?->newLine();
-        $this->command?->info(sprintf(
+        $this->command->newLine();
+        $this->command->info(sprintf(
             'Roles: %d · Permisos: %d',
             count(Roles::nombres()),
             count(Permisos::todos()),

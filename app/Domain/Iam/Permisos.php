@@ -15,45 +15,63 @@ namespace App\Domain\Iam;
 final class Permisos
 {
     public const CATALOGOS_VER = 'catalogo.ver';
+
     public const CATALOGOS_EDITAR = 'catalogo.editar';
 
     public const USUARIOS_VER = 'usuario.ver';
+
     public const USUARIOS_EDITAR = 'usuario.editar';
+
     public const ROLES_GESTIONAR = 'rol.gestionar';
 
     public const MESAS_VER = 'mesa.ver';
+
     public const MESAS_EDITAR = 'mesa.editar';
 
     public const ORDENES_VER_TODAS = 'orden.ver_todas';
+
     public const ORDENES_ANULAR = 'orden.anular';
+
     public const ORDENES_DESCUENTO = 'orden.descuento';
 
     public const POS_USAR = 'pos.usar';
+
     public const CAJA_REPORTE_X = 'caja.reporte_x';
+
     public const CAJA_REPORTE_Z = 'caja.reporte_z';
+
     public const CAJA_ARQUEO = 'caja.arqueo';
+
     public const CAJA_REEMBOLSO = 'caja.reembolso';
 
     public const COCINA_VER = 'cocina.ver';
+
     public const COCINA_CORTAR_ITEM = 'cocina.cortar_item';
 
     public const INVENTARIO_VER = 'inventario.ver';
+
     public const INVENTARIO_AJUSTAR = 'inventario.ajustar';
+
     public const INVENTARIO_RECETAS = 'inventario.recetas';
 
     public const RESERVAS_VER = 'reserva.ver';
+
     public const RESERVAS_EDITAR = 'reserva.editar';
 
     public const VENTAS_VER = 'venta.ver';
+
     public const VENTAS_REPORTES = 'venta.reportes';
 
     public const PARAMETROS_VER = 'parametro.ver';
+
     public const PARAMETROS_EDITAR = 'parametro.editar';
 
     public const AUDITORIA_VER = 'auditoria.ver';
 
     public const FACTURACION_VER = 'facturacion.ver';
+
     public const FACTURACION_EMITIR = 'facturacion.emitir';
+
     public const FACTURACION_NOTA = 'facturacion.nota';
 
     /**

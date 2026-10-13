@@ -18,9 +18,13 @@ namespace App\Domain\Iam;
 final class Roles
 {
     public const ADMINISTRADOR = 'administrador';
+
     public const GERENTE = 'gerente';
+
     public const CAJERO = 'cajero';
+
     public const MESERO = 'mesero';
+
     public const COCINA = 'cocina';
 
     /**

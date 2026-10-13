@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Domain\Mesas\Models\Sucursal;
 use Illuminate\Database\Seeder;
 
 /**
@@ -15,12 +14,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             SucursalesSeeder::class,
+            CatalogosSeeder::class,
             RolesSeeder::class,
             ParametrosSeeder::class,
             UsuariosDemoSeeder::class,
         ]);
 
-        $this->command?->newLine();
-        $this->command?->info('Datos base listos. Entra en /login con cualquier cuenta de la demo.');
+        $this->command->newLine();
+        $this->command->info('Datos base listos. Entra en /login con cualquier cuenta de la demo.');
     }
 }
