@@ -16,8 +16,6 @@ final readonly class ReporteCierreContexto
     public function __construct(
         public string $tipo,             // 'X' | 'Z'
         public FechaFiscal $fechaFiscal,
-        public int $sucursalId,
         public ?int $cajeroId = null,
-        public ?string $sucursalCodigo = null,
     ) {}
 }

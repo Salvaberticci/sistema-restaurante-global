@@ -28,11 +28,11 @@ desplegar y dar mantenimiento.
 
 | Rol | Correo | Contraseña |
 |---|---|---|
-| Administrador | `admin@casa-mango.test` | `demo1234` |
-| Gerente | `gerente@casa-mango.test` | `demo1234` |
-| Cajero | `cajero@casa-mango.test` | `demo1234` |
-| Mesero | `mesero@casa-mango.test` | `demo1234` |
-| Cocina | `cocina@casa-mango.test` | `demo1234` |
+| Administrador | `admin@restaurante.test` | `demo1234` |
+| Gerente | `gerente@restaurante.test` | `demo1234` |
+| Cajero | `cajero@restaurante.test` | `demo1234` |
+| Mesero | `mesero@restaurante.test` | `demo1234` |
+| Cocina | `cocina@restaurante.test` | `demo1234` |
 
 ---
 

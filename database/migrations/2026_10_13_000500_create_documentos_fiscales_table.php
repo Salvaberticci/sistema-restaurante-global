@@ -32,7 +32,6 @@ return new class extends Migration
             $table->string('idempotency_key', 191)->unique();
 
             $table->foreignId('documento_padre_id')->nullable();
-            $table->foreignId('sucursal_id')->nullable();
             $table->foreignId('orden_id')->nullable();
             $table->foreignId('cliente_id')->nullable();
             $table->foreignId('usuario_id')->nullable();
@@ -66,7 +65,7 @@ return new class extends Migration
             $table->timestamp('emitido_en')->nullable();
             $table->timestamps();
 
-            $table->index(['sucursal_id', 'fecha_fiscal']);
+            $table->index(['fecha_fiscal', 'tipo']);
             $table->index(['estado', 'created_at']);
             $table->index(['tipo', 'serie', 'numero'], 'documentos_fiscales_numero_idx');
         });

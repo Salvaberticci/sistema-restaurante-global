@@ -49,6 +49,12 @@ class ParametrosSeeder extends Seeder
                 'valor' => ['valor' => true, 'confirmado' => false],
             ],
             [
+                'clave' => 'igtf.alicuota_actual',
+                'grupo' => 'fiscal',
+                'descripcion' => 'Alícuota de IGTF que el POS aplica al calcular. Se lee de aquí para no tenerla escrita en el código. Mismo valor por defecto para las tres modalidades; se separa si el contador dice que difieren.',
+                'valor' => ['porcentaje' => '17', 'confirmado' => false],
+            ],
+            [
                 'clave' => 'impuestos.idc',
                 'grupo' => 'fiscal',
                 'descripcion' => 'Impuesto a Débitos y Créditos. Lo paga el restaurante al recibir pagos con tarjeta. NO va en el documento fiscal del cliente.',

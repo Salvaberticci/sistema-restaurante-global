@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use App\Domain\Mesas\Models\Sucursal;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -29,7 +27,6 @@ class User extends Authenticatable
         'password',
         'telefono',
         'cedula',
-        'sucursal_id',
         'activo',
     ];
 
@@ -45,11 +42,6 @@ class User extends Authenticatable
             'password' => 'hashed',
             'activo' => 'boolean',
         ];
-    }
-
-    public function sucursal(): BelongsTo
-    {
-        return $this->belongsTo(Sucursal::class);
     }
 
     /**

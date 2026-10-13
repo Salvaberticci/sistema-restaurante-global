@@ -24,7 +24,6 @@ final readonly class DocumentoFiscalContexto
         public Moneda $moneda,
         public LineasDocumento $lineas,
         public PagosDocumento $pagos,
-        public ?int $sucursalId = null,
         public ?int $ordenId = null,
         public ?int $clienteId = null,
         /** Tasa del día, congelada en el documento. Null si el documento es en USD. */
@@ -53,7 +52,6 @@ final readonly class DocumentoFiscalContexto
             'idempotency_key' => $this->idempotencyKey,
             'fecha_fiscal' => $this->fechaFiscal->iso(),
             'moneda' => $this->moneda->value,
-            'sucursal_id' => $this->sucursalId,
             'orden_id' => $this->ordenId,
             'cliente' => $this->clienteSnapshot,
             'tasa_cambio' => $this->tasaCambio?->__toString(),

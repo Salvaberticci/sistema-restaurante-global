@@ -17,7 +17,6 @@ final readonly class ResultadoReporte
     public function __construct(
         public string $tipo,              // 'X' | 'Z'
         public FechaFiscal $fecha,
-        public int $sucursalId,
         public Money $total,
         public int $cantidadDocumentos,
         public ?int $contadorZ,
@@ -32,7 +31,6 @@ final readonly class ResultadoReporte
         return [
             'tipo' => $this->tipo,
             'fecha' => $this->fecha->iso(),
-            'sucursal_id' => $this->sucursalId,
             'total' => $this->total->formateado(),
             'moneda' => $this->total->moneda()->value,
             'cantidad_documentos' => $this->cantidadDocumentos,

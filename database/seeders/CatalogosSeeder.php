@@ -11,7 +11,7 @@ use App\Domain\Mesas\Models\UnidadMedida;
 use Illuminate\Database\Seeder;
 
 /**
- * La carta de Casa Mango.
+ * La carta del restaurante de la demo.
  *
  * Precios en dólares, que es como se fija el precio en un restaurante venezolano
  * que cobra en ambas monedas. Son valores de ejemplo: sirven para que el demo

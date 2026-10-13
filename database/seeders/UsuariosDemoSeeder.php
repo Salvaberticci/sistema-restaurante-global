@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Domain\Iam\Roles;
-use App\Domain\Mesas\Models\Sucursal;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -16,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
  * acá sí, y por eso el login muestra los accesos directos.
  *
  * Todas usan `demo1234`. Es una demo, el password es público a propósito, y el
- * seeder escribe el modo demo en la interfaz para que no se confunda con datos
+ * banner de la interfaz escribe el modo demo para que no se confunda con datos
  * reales.
  */
 class UsuariosDemoSeeder extends Seeder
@@ -35,22 +34,9 @@ class UsuariosDemoSeeder extends Seeder
 
     public function run(): void
     {
-        $sucursal = Sucursal::orderBy('id')->first();
-
-        if ($sucursal === null) {
-            $this->command->warn('No hay sucursales: se corre SucursalesSeeder primero.');
-            $sucursal = Sucursal::create([
-                'nombre' => 'Casa Mango — Sabana',
-                'codigo' => 'SAB',
-                'direccion' => 'Av.Principal de Chacao, Caracas',
-                'ciudad' => 'Caracas',
-                'activo' => true,
-            ]);
-        }
-
         foreach (self::CUENTAS as $clave => $datos) {
             $usuario = User::updateOrCreate(
-                ['email' => $clave.'@casa-mango.test'],
+                ['email' => $clave.'@'.self::DOMINIO],
                 [
                     'name' => $datos['nombre'],
                     // updateOrCreate no reescribe la contraseña si el usuario ya
@@ -59,7 +45,6 @@ class UsuariosDemoSeeder extends Seeder
                     'password' => Hash::make(self::PASSWORD),
                     'cedula' => $datos['cedula'],
                     'telefono' => '0412-'.random_int(1000000, 9999999),
-                    'sucursal_id' => $sucursal->id,
                     'activo' => true,
                     'email_verified_at' => now(),
                 ],
@@ -72,6 +57,9 @@ class UsuariosDemoSeeder extends Seeder
         $this->command->info('Cuentas de demo listas. Contraseña de todas: '.self::PASSWORD);
     }
 
+    /** Dominio de correo de las cuentas. `.test` es reservado y nunca resuelve. */
+    private const DOMINIO = 'restaurante.test';
+
     /** @return array<string, array{email: string, rol: string, nombre: string}> Para el login con accesos directos. */
     public static function accesosDirectos(): array
     {
@@ -79,7 +67,7 @@ class UsuariosDemoSeeder extends Seeder
 
         foreach (self::CUENTAS as $clave => $datos) {
             $salida[$clave] = [
-                'email' => $clave.'@casa-mango.test',
+                'email' => $clave.'@'.self::DOMINIO,
                 'rol' => $datos['rol'],
                 'nombre' => $datos['nombre'],
             ];

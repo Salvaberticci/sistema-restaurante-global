@@ -57,7 +57,6 @@ function documento(
         moneda: Moneda::Dolar,
         lineas: $lineas,
         pagos: $pagos,
-        sucursalId: 1,
     );
 }
 
@@ -154,7 +153,6 @@ it('el reporte x no altera la memoria fiscal y el z si', function () {
     $contexto = new ReporteCierreContexto(
         tipo: 'X',
         fechaFiscal: fecha('2026-10-12'),
-        sucursalId: 1,
     );
 
     $x = $driver->reporteX($contexto);
@@ -191,7 +189,6 @@ it('la nota de credito no borra el documento original', function () {
         lineas: $lineas,
         pagos: $pagos,
         motivo: 'El cliente devolvio el plato',
-        sucursalId: 1,
     ));
 
     expect($nota->numeroFiscal)->not->toBe($factura->numeroFiscal)
@@ -217,7 +214,6 @@ it('no deja emitir dos notas contra el mismo documento', function () {
         lineas: $lineas,
         pagos: $pagos,
         motivo: 'Devolucion',
-        sucursalId: 1,
     );
 
     $driver->emitirNota($nota('nota-1'));
@@ -234,7 +230,6 @@ it('rechaza una nota contra un documento que no existe', function () {
         lineas: unaFacturaDe(),
         pagos: pagosDe(Money::deDolares('7.50')),
         motivo: 'Prueba',
-        sucursalId: 1,
     ));
 })->throws(IdempotenciaVioladaException::class);
 

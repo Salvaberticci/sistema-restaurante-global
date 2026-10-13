@@ -64,12 +64,6 @@ class UserResource extends Resource
                         ->label('Teléfono')
                         ->tel()
                         ->maxLength(30),
-
-                    Select::make('sucursal_id')
-                        ->label('Sucursal')
-                        ->relationship('sucursal', 'nombre')
-                        ->searchable()
-                        ->preload(),
                 ]),
 
             Section::make('Acceso')
@@ -120,11 +114,6 @@ class UserResource extends Resource
                     ->color('info')
                     ->separator(', '),
 
-                TextColumn::make('sucursal.nombre')
-                    ->label('Sucursal')
-                    ->placeholder('—')
-                    ->toggleable(),
-
                 TextColumn::make('iniciales')
                     ->label('')
                     ->badge()
@@ -138,11 +127,6 @@ class UserResource extends Resource
                 SelectFilter::make('roles')
                     ->label('Rol')
                     ->relationship('roles', 'name')
-                    ->preload(),
-
-                SelectFilter::make('sucursal_id')
-                    ->label('Sucursal')
-                    ->relationship('sucursal', 'nombre')
                     ->preload(),
 
                 TernaryFilter::make('activo')->label('Solo activos')->default(true),

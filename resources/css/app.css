@@ -6,6 +6,106 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/*
+| Pantallas públicas y de operación (POS, cocina, reservas).
+|
+| Fuera del panel, el esqueleto de Filament no aplica: estas pantallas son
+| Blade + Livewire + Alpine con Tailwind 4 directo.
+*/
+@layer components {
+    .srg-card {
+        @apply rounded-xl border border-white/10 bg-white/5 shadow-lg backdrop-blur-sm;
+        @apply transition duration-200;
+    }
+
+    .srg-card-hover {
+        @apply hover:-translate-y-0.5 hover:border-amber-400/40 hover:shadow-xl;
+    }
+
+    .srg-numero {
+        font-variant-numeric: tabular-nums;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .srg-entrada {
+        animation: srg-entrada 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .srg-escalonado > * {
+        animation: srg-entrada 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .srg-escalonado > *:nth-child(1) { animation-delay: 0ms; }
+    .srg-escalonado > *:nth-child(2) { animation-delay: 45ms; }
+    .srg-escalonado > *:nth-child(3) { animation-delay: 90ms; }
+    .srg-escalonado > *:nth-child(4) { animation-delay: 135ms; }
+    .srg-escalonado > *:nth-child(5) { animation-delay: 180ms; }
+    .srg-escalonado > *:nth-child(6) { animation-delay: 225ms; }
+    .srg-escalonado > *:nth-child(7) { animation-delay: 270ms; }
+    .srg-escalonado > *:nth-child(8) { animation-delay: 315ms; }
+
+    .srg-skeleton {
+        @apply relative overflow-hidden rounded-lg bg-white/5;
+    }
+
+    .srg-skeleton::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.07), transparent);
+        animation: srg-skeleton 1.4s infinite;
+    }
+
+    .srg-pulso {
+        animation: srg-pulso 2s ease-in-out infinite;
+    }
+
+    .srg-semaforo {
+        @apply inline-block h-2 w-2 flex-none rounded-full;
+    }
+
+    .srg-semaforo[data-nivel='verde'] { background: oklch(0.74 0.15 165); }
+    .srg-semaforo[data-nivel='ambar'] { background: oklch(0.79 0.16 76); }
+    .srg-semaforo[data-nivel='rojo'] { background: oklch(0.63 0.21 25); }
+}
+
+@keyframes srg-entrada {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes srg-skeleton {
+    100% { transform: translateX(100%); }
+}
+
+@keyframes srg-pulso {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+/* Animar todo lo que respete a quien pidió menos movimiento. Una animación no
+   puede ser el precio de poder leer la pantalla. */
+@media (prefers-reduced-motion: reduce) {
+    .srg-entrada,
+    .srg-escalonado > *,
+    .srg-pulso {
+        animation: none !important;
+    }
+
+    .srg-skeleton::after { animation: none; }
+
+    * { transition-duration: 1ms !important; }
 }

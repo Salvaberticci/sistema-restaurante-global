@@ -89,6 +89,12 @@ final class Codigo
             return [];
         }
 
+        // `app_path()` devuelve la ruta con barras normales, pero
+        // `getPathname()` en Windows devuelve barras invertidas. Sin
+        // normalizar, el recorte del nombre relativo sale mal y el test
+        // falla solo en Windows, que es donde más se ejecuta.
+        $raiz = rtrim(str_replace('\\', '/', $raiz), '/');
+
         $iterador = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($raiz, \FilesystemIterator::SKIP_DOTS),
         );
@@ -100,9 +106,11 @@ final class Codigo
                 continue;
             }
 
+            $ruta = str_replace('\\', '/', $archivo->getPathname());
+
             $archivos[] = [
                 'ruta' => $archivo->getPathname(),
-                'nombre' => substr($archivo->getPathname(), strlen($raiz) + 1),
+                'nombre' => str_replace('\\', '/', substr($ruta, strlen($raiz) + 1)),
             ];
         }
 

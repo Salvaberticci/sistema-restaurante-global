@@ -3,21 +3,20 @@
 namespace App\Domain\Mesas\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Zona o salón. Sirve para lo mismo en el salón de mesas y en el salón de
- * eventos: son espacios de una sucursal con una capacidad.
+ * Zona o salón del restaurante: el salón de mesas, el salón de eventos, la
+ * barra. Es un espacio con una capacidad y, en el caso de las mesas, con un
+ * número de turnaround para calcular cuántas veces se puede usar por noche.
  *
- * Sin borrado lógico, igual que la sucursal: un salón con reservas encima no se
- * borra, se desactiva.
+ * Sin borrado lógico: un salón con reservas encima no se borra, se desactiva.
  */
 class Zona extends Model
 {
     protected $table = 'zonas';
 
     protected $fillable = [
-        'sucursal_id', 'nombre', 'tipo', 'capacidad', 'mesas', 'turnover_minutos', 'activo',
+        'nombre', 'tipo', 'capacidad', 'mesas', 'turnover_minutos', 'activo',
     ];
 
     protected function casts(): array
@@ -30,8 +29,8 @@ class Zona extends Model
         ];
     }
 
-    public function sucursal(): BelongsTo
+    public function scopeActivas($query)
     {
-        return $this->belongsTo(Sucursal::class);
+        return $query->where('activo', true);
     }
 }

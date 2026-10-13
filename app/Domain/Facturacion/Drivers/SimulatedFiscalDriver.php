@@ -70,7 +70,6 @@ final class SimulatedFiscalDriver implements FiscalDocumentDriver
             serie: $this->serie($contexto),
             fechaFiscal: $contexto->fechaFiscal,
             moneda: $contexto->moneda,
-            sucursalId: $contexto->sucursalId,
             ordenId: $contexto->ordenId,
         );
     }
@@ -230,12 +229,11 @@ final class SimulatedFiscalDriver implements FiscalDocumentDriver
     {
         $this->asegurarOperativo();
 
-        $turno = $this->memoria->turno($contexto->fechaFiscal, $contexto->sucursalId);
+        $turno = $this->memoria->turno($contexto->fechaFiscal);
 
         return new ResultadoReporte(
             tipo: 'X',
             fecha: $contexto->fechaFiscal,
-            sucursalId: $contexto->sucursalId,
             total: $turno->total,
             cantidadDocumentos: $turno->cantidad,
             contadorZ: $this->memoria->ultimoContadorZ(),
@@ -256,13 +254,12 @@ final class SimulatedFiscalDriver implements FiscalDocumentDriver
     {
         $this->asegurarOperativo();
 
-        $turno = $this->memoria->turno($contexto->fechaFiscal, $contexto->sucursalId);
-        $contadorZ = $this->memoria->registrarCierreZ($contexto->fechaFiscal, $contexto->sucursalId);
+        $turno = $this->memoria->turno($contexto->fechaFiscal);
+        $contadorZ = $this->memoria->registrarCierreZ($contexto->fechaFiscal);
 
         return new ResultadoReporte(
             tipo: 'Z',
             fecha: $contexto->fechaFiscal,
-            sucursalId: $contexto->sucursalId,
             total: $turno->total,
             cantidadDocumentos: $turno->cantidad,
             contadorZ: $contadorZ,

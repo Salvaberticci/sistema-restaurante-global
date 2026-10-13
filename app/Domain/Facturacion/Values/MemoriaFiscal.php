@@ -33,10 +33,10 @@ final class MemoriaFiscal
     /** @var array<string, int> correlativo por "serie|fecha" */
     private array $correlativos = [];
 
-    /** @var array<string, int> número de facturas por "sucursal|fecha" */
+    /** @var array<string, int> numero de facturas por fecha */
     private array $documentosPorTurno = [];
 
-    /** @var array<string, Money> total del turno por "sucursal|fecha" */
+    /** @var array<string, Money> total del turno por fecha */
     private array $totalPorTurno = [];
 
     /** @var array<string, ResultadoFiscal> emitido por idempotencyKey */
@@ -73,7 +73,6 @@ final class MemoriaFiscal
         string $serie,
         FechaFiscal $fechaFiscal,
         Moneda $moneda,
-        ?int $sucursalId,
         ?int $ordenId,
     ): SesionFiscal {
         $this->lineas = LineasDocumento::de();
@@ -85,7 +84,6 @@ final class MemoriaFiscal
             serie: $serie,
             fechaFiscal: $fechaFiscal,
             moneda: $moneda,
-            sucursalId: $sucursalId,
             ordenId: $ordenId,
         );
 
@@ -171,9 +169,9 @@ final class MemoriaFiscal
         return $this->consumiblesRestantes;
     }
 
-    public function turno(FechaFiscal $fecha, int $sucursalId): TurnoFiscal
+    public function turno(FechaFiscal $fecha): TurnoFiscal
     {
-        $clave = $this->claveTurno($fecha, $sucursalId);
+        $clave = $this->claveTurno($fecha);
 
         $total = $this->totalPorTurno[$clave]
             ?? Money::deCero($this->sesionAbierta->moneda ?? Moneda::Dolar);
@@ -188,13 +186,12 @@ final class MemoriaFiscal
         string $idempotencyKey,
         ResultadoFiscal $resultado,
         FechaFiscal $fecha,
-        ?int $sucursalId = null,
+
     ): void {
         $this->emitidos[$idempotencyKey] = $resultado;
         $this->keyPorNumero[$resultado->numeroFiscal] = $idempotencyKey;
 
-        $sucursal = $sucursalId ?? $this->sesionAbierta->sucursalId ?? 0;
-        $clave = $this->claveTurno($fecha, $sucursal);
+        $clave = $this->claveTurno($fecha);
 
         $this->documentosPorTurno[$clave] = ($this->documentosPorTurno[$clave] ?? 0) + 1;
         $this->totalPorTurno[$clave] = isset($this->totalPorTurno[$clave])
@@ -208,12 +205,12 @@ final class MemoriaFiscal
      * El Reporte Z graba el contador y resetea el turno. Devuelve el contador Z
      * que quedó en la memoria fiscal.
      */
-    public function registrarCierreZ(FechaFiscal $fecha, int $sucursalId): int
+    public function registrarCierreZ(FechaFiscal $fecha): int
     {
         $this->contadorZ++;
         unset(
-            $this->documentosPorTurno[$this->claveTurno($fecha, $sucursalId)],
-            $this->totalPorTurno[$this->claveTurno($fecha, $sucursalId)],
+            $this->documentosPorTurno[$this->claveTurno($fecha)],
+            $this->totalPorTurno[$this->claveTurno($fecha)],
         );
 
         return $this->contadorZ;
@@ -274,8 +271,8 @@ final class MemoriaFiscal
         return $serie.'|'.$fecha->iso();
     }
 
-    private function claveTurno(FechaFiscal $fecha, int $sucursalId): string
+    private function claveTurno(FechaFiscal $fecha): string
     {
-        return $sucursalId.'|'.$fecha->iso();
+        return $fecha->iso();
     }
 }

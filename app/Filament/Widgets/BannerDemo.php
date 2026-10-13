@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Domain\Mesas\Models\Sucursal;
 use Filament\Widgets\Widget;
 
 /**
@@ -11,7 +10,8 @@ use Filament\Widgets\Widget;
  * Mientras `DEMO_MODO` esté activo, esta cinta aparece en todas las pantallas
  * del panel. El motivo es concreto: los datos son de un restaurante ficticio y
  * hay valores fiscales de ejemplo sin confirmar. Que el cliente lo vea escrito
- * es mejor que después preguntarle por qué el restaurante se llama Casa Mango.
+ * es mejor que después preguntarle por qué el restaurante no tiene el nombre
+ * que él esperaba.
  */
 class BannerDemo extends Widget
 {
@@ -33,8 +33,6 @@ class BannerDemo extends Widget
 
     public function getViewData(): array
     {
-        return [
-            'sucursales' => Sucursal::activas()->pluck('nombre'),
-        ];
+        return [];
     }
 }

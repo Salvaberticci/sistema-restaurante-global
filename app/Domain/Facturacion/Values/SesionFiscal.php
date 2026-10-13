@@ -21,7 +21,6 @@ final readonly class SesionFiscal
         public string $serie,
         public FechaFiscal $fechaFiscal,
         public Moneda $moneda,
-        public ?int $sucursalId = null,
         public ?int $ordenId = null,
     ) {}
 

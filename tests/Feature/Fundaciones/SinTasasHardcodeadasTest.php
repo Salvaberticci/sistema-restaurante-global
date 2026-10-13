@@ -49,7 +49,7 @@ it('el reloj del dominio vive solo en FechaFiscal', function () {
         ),
     ));
 
-    expect(array_column($conReloj, 'nombre'))->toBe(['Shared'.\DIRECTORY_SEPARATOR.'Support'.\DIRECTORY_SEPARATOR.'FechaFiscal.php']);
+    expect(array_column($conReloj, 'nombre'))->toBe(['Shared/Support/FechaFiscal.php']);
 });
 
 it('los documentos fiscales se guardan con escala 4 y no con float', function () {

@@ -1,0 +1,355 @@
+/*
+|--------------------------------------------------------------------------
+| Tema del panel de administración
+|--------------------------------------------------------------------------
+|
+| Capa de estilo que se carga DESPUÉS de la de Filament, para poder corregir
+| cosas sin reescribir sus componentes.
+|
+| Filament 3 compila su tema con Tailwind 3, pero este proyecto usa Tailwind 4,
+| así que su compilador no sirve. Lo que se hace es registrar este bundle como
+| tema del panel con `->viteTheme('resources/css/admin/theme.css', 'admin')`:
+| Tailwind 4 resuelve sus propias clases y esto entra después en la cascada.
+|
+| La paleta es ámbar sobre carbón. Ámbar porque es el color de una cocina
+| caliente y de una luz de barra; carbón porque hace que los números, que es
+| lo que importa en un panel, resalten contra el fondo.
+|
+| Las utilidades con prefijo `srg-` evitan pisar las de Filament. Prevenir un
+| conflicto es más barato que debuggearlo.
+|
+*/
+
+@import 'tailwindcss';
+
+@source '../../../app/Filament/**/*.php';
+@source '../../../resources/views/filament/**/*.blade.php';
+@source '../../../app/Livewire/**/*.php';
+@source '../../../resources/views/livewire/**/*.blade.php';
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Tokens
+ |
+ | Un solo lugar donde cambiar la identidad del sistema.
+ ────────────────────────────────────────────────────────────────────────────── */
+
+@theme {
+    --color-srg-ambar-50: oklch(0.97 0.02 85);
+    --color-srg-ambar-200: oklch(0.88 0.13 82);
+    --color-srg-ambar-400: oklch(0.79 0.16 76);
+    --color-srg-ambar-500: oklch(0.73 0.17 72);
+    --color-srg-ambar-600: oklch(0.65 0.16 66);
+
+    --color-srg-carbon-700: oklch(0.26 0.01 260);
+    --color-srg-carbon-800: oklch(0.21 0.01 260);
+    --color-srg-carbon-900: oklch(0.17 0.01 260);
+    --color-srg-carbon-950: oklch(0.13 0.01 260);
+
+    --color-srg-uva-500: oklch(0.62 0.19 293);
+    --color-srg-menta-500: oklch(0.74 0.15 165);
+    --color-srg-rojo-500: oklch(0.63 0.21 25);
+
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system,
+        'Segoe UI', Roboto, sans-serif;
+
+    --shadow-srg: 0 1px 2px 0 rgb(0 0 0 / 0.25), 0 8px 24px -12px rgb(0 0 0 / 0.5);
+    --shadow-srg-lg: 0 2px 4px 0 rgb(0 0 0 / 0.3), 0 24px 48px -16px rgb(0 0 0 / 0.6);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Base
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.fi-body,
+.fi-simple-layout {
+    font-family: var(--font-sans);
+    letter-spacing: -0.011em;
+}
+
+/* Fondo con dos focos de luz. Un panel sobre gris plano se ve como una tabla
+ | de Excel; el degradado da profundidad sin distraer del contenido. */
+.fi-body {
+    background:
+        radial-gradient(1100px 600px at 12% -8%, rgb(245 158 11 / 0.07), transparent 60%),
+        radial-gradient(900px 500px at 88% 0%, rgb(124 58 237 / 0.05), transparent 55%),
+        var(--color-srg-carbon-950);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Barra superior y laterales
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.fi-topbar {
+    background: color-mix(in oklab, var(--color-srg-carbon-900) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgb(255 255 255 / 0.06);
+    box-shadow: 0 1px 0 0 rgb(0 0 0 / 0.4);
+}
+
+.fi-sidebar {
+    background: color-mix(in oklab, var(--color-srg-carbon-950) 92%, transparent);
+    border-right: 1px solid rgb(255 255 255 / 0.05);
+}
+
+.fi-sidebar-group-label {
+    color: color-mix(in oklab, var(--color-srg-ambar-400) 70%, transparent);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Tarjetas
+ |
+ | Todo lo que flota sobre el fondo lleva el mismo tratamiento: borde fino,
+ | sombra corta y una elevación al pasar por encima.
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.srg-card,
+.fi-wi-stats-overview-stat,
+.fi-ta-ctn,
+.fi-dropdown-panel,
+.fi-modal-window {
+    background: color-mix(in oklab, var(--color-srg-carbon-900) 92%, transparent);
+    border: 1px solid rgb(255 255 255 / 0.07);
+    border-radius: 0.875rem;
+    box-shadow: var(--shadow-srg);
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.srg-card-hover:hover,
+.fi-wi-stats-overview-stat:hover {
+    border-color: color-mix(in oklab, var(--color-srg-ambar-400) 35%, transparent);
+    box-shadow: var(--shadow-srg-lg);
+    transform: translateY(-2px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Botón primario
+ |
+ | Ámbar sólido con texto carbón. Es el color de marca y por eso se reserva
+ | para lo que de verdad abre una acción.
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.fi-btn.fi-color-amber,
+.fi-btn[class*='fi-color-amber'] {
+    background: linear-gradient(135deg, var(--color-srg-ambar-500), var(--color-srg-ambar-600));
+    border-color: transparent;
+    color: var(--color-srg-carbon-950);
+    font-weight: 600;
+    box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.25) inset;
+    transition: filter 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.fi-btn.fi-color-amber:hover,
+.fi-btn[class*='fi-color-amber']:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -8px rgb(245 158 11 / 0.55);
+}
+
+.fi-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Tipografía
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.fi-heading,
+.fi-header-heading {
+    font-weight: 650;
+    letter-spacing: -0.02em;
+}
+
+.srg-numero {
+    font-variant-numeric: tabular-nums;
+    font-weight: 680;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Tablas
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.fi-ta-header-cell {
+    background: color-mix(in oklab, var(--color-srg-carbon-800) 70%, transparent);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-bottom-color: rgb(255 255 255 / 0.08);
+}
+
+.fi-ta-row {
+    transition: background-color 140ms ease;
+}
+
+.fi-ta-row:hover {
+    background: color-mix(in oklab, var(--color-srg-ambar-400) 6%, transparent);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Formularios
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.fi-input,
+.fi-select-input {
+    background: color-mix(in oklab, var(--color-srg-carbon-950) 60%, transparent);
+    border-color: rgb(255 255 255 / 0.1);
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.fi-input:focus,
+.fi-select-input:focus {
+    border-color: var(--color-srg-ambar-400);
+    box-shadow: 0 0 0 3px rgb(245 158 11 / 0.16);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Animaciones
+ |
+ | Cortas (150-320 ms) y poco viaja: se nota el movimiento sin esperar por él.
+ ────────────────────────────────────────────────────────────────────────────── */
+
+@keyframes srg-entrada {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes srg-entrada-suave {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes srg-skeleton {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+@keyframes srg-pulso {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
+}
+
+.srg-entrada {
+    animation: srg-entrada 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Escalonado: cada elemento entra un poco después del anterior. Con ocho
+ * tarjetas se ve como una cascada; con stagger fijo se ve como una demora. */
+.srg-escalonado > * {
+    animation: srg-entrada 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.srg-escalonado > *:nth-child(1) { animation-delay: 0ms; }
+.srg-escalonado > *:nth-child(2) { animation-delay: 45ms; }
+.srg-escalonado > *:nth-child(3) { animation-delay: 90ms; }
+.srg-escalonado > *:nth-child(4) { animation-delay: 135ms; }
+.srg-escalonado > *:nth-child(5) { animation-delay: 180ms; }
+.srg-escalonado > *:nth-child(6) { animation-delay: 225ms; }
+.srg-escalonado > *:nth-child(7) { animation-delay: 270ms; }
+.srg-escalonado > *:nth-child(8) { animation-delay: 315ms; }
+
+/* Esqueletos de carga. Un espacio vacío parpadeando se lee como error; un
+ * esqueleto con brillo se lee como "está cargando". */
+.srg-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgb(255 255 255 / 0.045);
+    border-radius: 0.5rem;
+}
+
+.srg-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.07), transparent);
+    animation: srg-skeleton 1.4s infinite;
+}
+
+.srg-pulso {
+    animation: srg-pulso 2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Barra de demo
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.srg-demo-banner {
+    margin-bottom: 1.5rem;
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-srg-ambar-50);
+    background: linear-gradient(
+        100deg,
+        color-mix(in oklab, var(--color-srg-ambar-600) 26%, transparent),
+        color-mix(in oklab, var(--color-srg-ambar-500) 12%, transparent)
+    );
+    border: 1px solid color-mix(in oklab, var(--color-srg-ambar-400) 38%, transparent);
+    animation: srg-entrada-suave 400ms ease both;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Indicadores de estado
+ |
+ | El semáforo de la cocina se usa en varias pantallas: el mismo color tiene que
+ | decir lo mismo en todas.
+ ────────────────────────────────────────────────────────────────────────────── */
+
+.srg-semaforo {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    flex: none;
+}
+
+.srg-semaforo[data-nivel='verde'] { background: var(--color-srg-menta-500); }
+.srg-semaforo[data-nivel='ambar'] { background: var(--color-srg-ambar-400); }
+.srg-semaforo[data-nivel='rojo'] { background: var(--color-srg-rojo-500); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ | Accesibilidad
+ |
+ | Si alguien pidió menos movimiento, el movimiento se apaga entero. Una
+ | animación no puede ser el precio de leer la pantalla.
+ ────────────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .srg-entrada,
+    .srg-escalonado > *,
+    .srg-pulso {
+        animation: none !important;
+    }
+
+    .srg-skeleton::after {
+        animation: none;
+    }
+
+    * {
+        transition-duration: 1ms !important;
+    }
+}

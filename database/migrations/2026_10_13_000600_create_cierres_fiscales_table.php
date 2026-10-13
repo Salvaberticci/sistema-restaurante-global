@@ -26,7 +26,6 @@ return new class extends Migration
 
             $table->string('tipo', 10);
             $table->date('fecha_fiscal');
-            $table->foreignId('sucursal_id');
             $table->foreignId('cajero_id')->nullable();
             $table->foreignId('usuario_id')->nullable();
 
@@ -47,7 +46,7 @@ return new class extends Migration
             $table->timestamp('emitido_en')->nullable();
             $table->timestamps();
 
-            $table->index(['sucursal_id', 'fecha_fiscal', 'tipo']);
+            $table->index(['fecha_fiscal', 'tipo']);
         });
     }
 

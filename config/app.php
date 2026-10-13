@@ -6,11 +6,6 @@ return [
     |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
-    |
-    | This value is the name of your application, which will be used when the
-    | framework needs to place the application's name in a notification or
-    | other UI elements where an application name needs to be displayed.
-    |
     */
 
     'name' => env('APP_NAME', 'Laravel'),
@@ -19,11 +14,6 @@ return [
     |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
-    |
-    | This value determines the "environment" your application is currently
-    | running in. This may determine how you prefer to configure various
-    | services the application utilizes. Set this in your ".env" file.
-    |
     */
 
     'env' => env('APP_ENV', 'production'),
@@ -32,11 +22,6 @@ return [
     |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
-    |
-    | When your application is in debug mode, detailed error messages with
-    | stack traces will be shown on every error that occurs within your
-    | application. If disabled, a simple generic error page is shown.
-    |
     */
 
     'debug' => (bool) env('APP_DEBUG', false),
@@ -46,9 +31,11 @@ return [
     | Application URL
     |--------------------------------------------------------------------------
     |
-    | This URL is used by the console to properly generate URLs when using
-    | the Artisan command line tool. You should set this to the root of
-    | the application so that it's available within Artisan commands.
+    | En el servidor la app vive en un subdirectorio, así que esta URL lo lleva
+    | dentro: https://dominio/sistema-restaurante-global
+    |
+    | No es cosmético. Laravel genera las rutas a partir de aquí, y si le falta
+    | el prefijo todas apuntan a la raíz del dominio y devuelven 404.
     |
     */
 
@@ -59,10 +46,9 @@ return [
     | Asset URL
     |--------------------------------------------------------------------------
     |
-    | En el servidor la aplicación vive en un subdirectorio, así que los assets
-    | se sirven desde https://dominio/subdirectorio y no desde la raíz. Sin
-    | ASSET_URL el CSS y el JS de Vite y de Filament dan 404 y la página sale
-    | sin estilo. Ver AGENTS.md §4, trampa 6.
+    | Los assets se sirven desde el mismo prefijo que la aplicación. Sin esto,
+    | el CSS y el JS de Vite y de Filament dan 404 y la página sale sin estilo.
+    | Ver AGENTS.md §4, trampa 6.
     |
     */
 
@@ -76,36 +62,50 @@ return [
     | Invariante I4: la fecha fiscal manda. America/Caracas, no UTC. Cualquier
     | corte, cierre o emisión de documento usa esta zona, nunca la del servidor.
     |
+    | Si esto queda en UTC, el "hoy" del sistema se corre un día al pasar las
+    | 20:00 y los reportes del día salen vacíos sin que nada falle.
+    |
     */
 
     'timezone' => env('APP_TIMEZONE', 'America/Caracas'),
 
     /*
     |--------------------------------------------------------------------------
-    | Application Locale Configuration
+    | Application Subdirectory
     |--------------------------------------------------------------------------
     |
-    | The application locale determines the default locale that will be used
-    | by Laravel's translation / localization methods. This option can be
-    | set to any locale for which you plan to have translation strings.
+    | Carpeta en la que cuelga la aplicación dentro del dominio.
+    |
+    |   servidor  → sistema-restaurante-global         (docroot = raíz del proyecto)
+    |   Apache    → sistema-restaurante-global/public
+    |
+    | Lo usa el middleware FuerzaRaizDeUrls para registrar las rutas de Livewire
+    | con el prefijo. Sin esto el panel carga pero ningún formulario responde,
+    | porque los POST van a la raíz del dominio y vuelven 404.
+    |
+    | Vacío = la app está en la raíz del dominio, que es lo normal en cualquier
+    | instalación que no sea esta.
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'subdirectorio' => env('APP_SUBDIRECTORIO', ''),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    /*
+    |--------------------------------------------------------------------------
+    | Application Locale Configuration
+    |--------------------------------------------------------------------------
+    */
 
-    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'locale' => env('APP_LOCALE', 'es'),
+
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'es'),
+
+    'faker_locale' => env('APP_FAKER_LOCALE', 'es_VE'),
 
     /*
     |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
-    |
-    | This key is utilized by Laravel's encryption services and should be set
-    | to a random, 32 character string to ensure that all encrypted values
-    | are secure. You should do this prior to deploying the application.
-    |
     */
 
     'cipher' => 'AES-256-CBC',
@@ -114,7 +114,7 @@ return [
 
     'previous_keys' => [
         ...array_filter(
-            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+            explode(',', (string) env('APP_PREVIOUS_KEYS', '')),
         ),
     ],
 
@@ -122,13 +122,6 @@ return [
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver
     |--------------------------------------------------------------------------
-    |
-    | These configuration options determine the driver used to determine and
-    | manage Laravel's "maintenance mode" status. The "cache" driver will
-    | allow maintenance mode to be controlled across multiple machines.
-    |
-    | Supported drivers: "file", "cache"
-    |
     */
 
     'maintenance' => [
