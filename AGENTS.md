@@ -135,6 +135,13 @@ Añadidas para este proyecto (Vite + Filament + Livewire, que `isp-core` no ten�
 - Nombres en **español** para el dominio y la base de datos (`ordenes`, `mesas`,
   `documentos_fiscales`). Nombres en inglés para lo de Laravel (`HasFactory`,
   `SoftDeletes`, `casts()`).
+- ⚠️ **`protected $table` explícito en todo modelo del dominio.** El pluralizador
+  de Laravel es inglés: de `Sucursal` saca `sucursals`, no `sucursales`, y el
+  error es `Table 'sucursals' doesn't exist`, que manda a mirar la migración
+  cuando el problema está en el modelo.
+- ⚠️ **`SoftDeletes` solo donde tenga sentido.** Un registro con documentos
+  asociados (documentos fiscales, órdenes, inventario) **no se borra**: se
+  desactiva con `activo`. Un `DELETE` dejaría facturas apuntando a la nada.
 - **Una migración por Concerns**, fechas en el nombre: `2026_10_12_000100_create_mesas.php`.
 - ⚠️ **Nunca editar una migración ya aplicada en el servidor.** Se agrega una nueva.
 - Enums siempre en `app/Enums/`, con casos y métodos, nunca cadenas sueltas.

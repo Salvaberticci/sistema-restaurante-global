@@ -16,7 +16,7 @@
 | # | Spec | Módulo | Depende de | Estado |
 |---|---|---|---|---|
 | 000 | [fundaciones](000-fundaciones/spec.md) | Base técnica, dominio, driver fiscal | — | 🟡 |
-| 010 | [iam-roles](010-iam-roles/spec.md) | Roles y usuarios | 000 | ⬜ |
+| 010 | [iam-roles](010-iam-roles/spec.md) | Roles y usuarios | 000 | 🟡 |
 | 020 | [catalogos](020-catalogos/spec.md) | Productos, insumos, IVA, métodos de pago | 010 | ⬜ |
 | 030 | [tasa-cambio](030-tasa-cambio/spec.md) | Tasa BCV y multi-moneda | 020 | ⬜ |
 | 040 | [menu-digital](040-menu-digital/spec.md) | Menú editable | 020 | ⬜ |
