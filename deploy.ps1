@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Despliega sistema-restaurante-global a demo.salvanovasolutions.online.
 
@@ -43,7 +43,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-Set-StrictMode -Version Latest
+
+# Sin Set-StrictMode: en Windows PowerShell 5.1 aborta el script antes de la
+# primera linea de salida cuando encuentra una variable no inicializada
+# ($LASTEXITCODE, por ejemplo). El script es lineal y falla solo, asi que el
+# modo estricto no aporta nada aqui y si estorba.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Utilidades
@@ -68,14 +72,32 @@ function Invocar {
     param([string]$Comando, [string]$Descripcion)
 
     Say "  $Descripcion" 'DarkGray'
-    $salida = Invoke-Expression $Comando 2>&1
 
-    if ($LASTEXITCODE -ne 0) {
-        $salida | ForEach-Object { Write-Host "    $_" -ForegroundColor 'DarkRed' }
-        Die "$Descripcion falló (código $LASTEXITCODE)"
+    # PowerShell convierte cualquier linea de stderr de un comando nativo en un
+    # error y, con ErrorActionPreference Stop, aborta el script. npm escribe
+    # avisos por stderr aunque el build salga bien (la version de Node
+    # recomendada, por ejemplo). Aqui lo que decide si fallo es el codigo de
+    # salida, no si escribio en stderr.
+    $ErrorActionPreference = 'Continue'
+
+    try {
+        $salida = Invoke-Expression $Comando 2>&1
+        $codigo = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = 'Stop'
     }
 
-    return $salida
+    if ($codigo -ne 0) {
+        $salida | ForEach-Object { Write-Host "    $_" -ForegroundColor 'DarkRed' }
+        Die "$Descripcion fallo (codigo $codigo)"
+    }
+
+    $ruidosas = @('Node.js', 'npm fund', 'Deprecation', 'deprecation', 'warning ')
+
+    return $salida | Where-Object {
+        $linea = $_.ToString()
+        -not ($ruidosas | Where-Object { $linea -like "*$_*" })
+    }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -89,7 +111,7 @@ if (-not (Test-Path $Llave)) { Die "No existe la llave SSH en $Llave" }
 
 foreach ($comando in @('php', 'composer', 'node', 'tar')) {
     if (-not (Get-Command $comando -ErrorAction SilentlyContinue)) {
-        Die "Falta `$comando en el PATH"
+        Die ('Falta ' + $comando + ' en el PATH')
     }
 }
 
@@ -145,7 +167,10 @@ Remove-Item $tarball -Force -ErrorAction SilentlyContinue
 
 Push-Location $ProyectoLocal
 try {
-    Invocar "tar -czf `"$tarball`" --exclude=.git --exclude=vendor --exclude=node_modules --exclude=.env --exclude=public/build --exclude=public/hot --exclude=storage/logs --exclude=storage/framework/views --exclude=bootstrap/cache/*.php --exclude=*.tar.gz ." 'Creando tar'
+    # `public/build` SI se incluye aunque esté en .gitignore: se compiló hace un
+    # momento y el servidor lo necesita para copiarlo a la raíz del docroot.
+    # `.gitignore` es para git, no para el paquete de despliegue.
+    Invocar "tar -czf `"$tarball`" --exclude=.git --exclude=vendor --exclude=node_modules --exclude=.env --exclude=public/hot --exclude=storage/logs --exclude=storage/framework/views --exclude=bootstrap/cache/*.php --exclude=*.tar.gz ." 'Creando tar'
 } finally {
     Pop-Location
 }
@@ -177,45 +202,75 @@ function InvocarSsh {
     Say "  $Descripcion" 'DarkGray'
 
     $codificado = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Script))
-    $salida = & ssh @sshArgs "echo $codificado | base64 -d | bash" 2>&1
 
-    if ($LASTEXITCODE -ne 0) {
-        $salida | ForEach-Object { Write-Host "    $_" -ForegroundColor 'DarkRed' }
-        Die "$Descripcion falló en el servidor"
+    $ErrorActionPreference = 'Continue'
+    try {
+        $salida = & ssh @sshArgs "echo $codificado | base64 -d | bash" 2>&1
+        $codigo = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = 'Stop'
     }
 
     $texto = $salida -join "`n"
 
-    if ($texto -match 'REMOTE_ERROR') { Die ($texto -split 'REMOTE_ERROR: ')[1] }
+    if ($codigo -ne 0 -or $texto -match 'REMOTE_ERROR') {
+        $salida | Where-Object { $_ -notmatch 'Composer|Downloading|Generating|Package operations|Installing|Updating|Locking|Nothing to modify|Do not run|No security advisory' } |
+            ForEach-Object { Write-Host "    $_" -ForegroundColor 'DarkGray' }
+        Die "$Descripcion fallo en el servidor"
+    }
 
     return $texto
 }
 
-$instalar = @"
+# Here-string LITERAL a proposito: un `@"..."@` expande el `$(...)` de bash en
+# PowerShell y manda el comando roto al servidor. Los valores llegan por
+# marcadores, no por interpolacion.
+$instalar = @'
 set -e
-cd "$RutaRemota"
+cd "__RUTA__"
 
 # El .env del servidor se preserva: el tar no lo trae, pero si algo lo creara
 # desde cero hay que detenerse en vez de dejarlo sin APP_KEY.
 if [ ! -f .env ]; then
-  echo "REMOTE_ERROR: no existe .env en el servidor. Créalo antes de desplegar."
+  echo "REMOTE_ERROR: no existe .env en el servidor. Crealo antes de desplegar."
   exit 1
 fi
-cp -n .env .env.bak.\$(date +%Y%m%d-%H%M%S) 2>/dev/null || true
+cp .env .env.bak
 
-tar -xzf /home/${Usuario}/$nombreRemoto
+tar -xzf __TAR__
 
-# El docroot es la raíz del proyecto, no public/. Sin esto el HTML se actualiza
-# y el estilo se queda en la versión anterior.
+# Git no versiona carpetas vacias, asi que storage/framework y storage/logs no
+# llegan en el tar. Sin ellas composer falla con "Please provide a valid cache
+# path". Se crean siempre antes de instalar.
+mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache
+
+# ── Docroot de la raíz ───────────────────────────────────────────────────────
+# El docroot es la raíz del proyecto, no public/. Eso obliga a dos cosas:
+#
+#  1. Copiar los assets de public/ a la raíz. Sin esto el HTML se actualiza y el
+#     estilo se queda en la versión anterior.
+#  2. Poner el index.php y el .htaccess en la raíz. El .htaccess de public/ no
+#     aplica desde ahí, y sin el de la raíz `vendor/`, `config/` y `.env`
+#     quedan descargables por el navegador.
 rm -rf build
 cp -R public/build build
 
-export COMPOSER_HOME=/home/${Usuario}/.composer
-php /home/${Usuario}/bin/composer install --no-dev --optimize-autoloader --no-interaction
+if [ -d public/js/filament ]; then
+  mkdir -p js/filament css/filament
+  cp -R public/js/filament/. js/filament/
+  cp -R public/css/filament/. css/filament/
+fi
+
+cp deploy/root/.htaccess .htaccess
+sed "s#__DIR__\.'/\.\./#__DIR__.'/#g" public/index.php > index.php
+chmod 644 .htaccess index.php
+
+export COMPOSER_HOME=__HOME__/.composer
+php __HOME__/bin/composer install --no-dev --optimize-autoloader --no-interaction
 
 php artisan migrate --force
 
-# route:cache rompe la raíz con 405 en este hosting. route:clear, siempre.
+# route:cache rompe la raiz con 405 en este hosting. route:clear, siempre.
 php artisan route:clear
 php artisan config:clear
 php artisan view:clear
@@ -228,11 +283,16 @@ chmod -R 775 storage bootstrap/cache
 chmod 600 .env
 
 echo "DEPLOY_OK"
-"@
+'@
+
+$homeUsuario = "/home/$Usuario"
+$instalar = $instalar.Replace('__RUTA__', $RutaRemota)
+$instalar = $instalar.Replace('__TAR__', "$homeUsuario/$nombreRemoto")
+$instalar = $instalar.Replace('__HOME__', $homeUsuario)
 
 $salidaInstalar = InvocarSsh -Script $instalar -Descripcion 'Extrayendo, instalando y migrando'
 
-if ($salidaInstalar -notmatch 'DEPLOY_OK') { Die 'El script del servidor no confirmó el deploy' }
+if ($salidaInstalar -notmatch 'DEPLOY_OK') { Die 'El script del servidor no confirmo el deploy' }
 
 SayOk 'Servidor actualizado'
 

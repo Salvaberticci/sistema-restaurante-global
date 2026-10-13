@@ -20,7 +20,8 @@ desplegar y dar mantenimiento.
 | **MySQL** | MariaDB 11.4 |
 | **Composer** | `/home/salvxkld/bin/composer` |
 | **Usuario SSH** | `salvxkld` · **puerto 21098** · llave `id_rsa_cpanel` |
-| **Base de datos** | `salvxkld_restaurante` (usuario `salvxkld_salvatore`, compartido) |
+| **PHP (CLI)** | `/usr/local/bin/php` (8.2.34) |
+| **Base de datos** | `salvxkld_srg` (usuario `salvxkld_salvatore`, compartido) |
 | **Repo** | `git@github.com:Salvaberticci/sistema-restaurante-global.git` (**privado**) |
 
 ### Cuentas demo
@@ -67,7 +68,12 @@ Y si hay que hacerlo a mano:
 # 3. En el servidor:
 cd /home/salvxkld/demo.salvanovasolutions.online/sistema-restaurante-global
 tar -xzf /home/salvxkld/srg-deploy.tar.gz
-cp -R public/build/. build/            # <- el paso que más se olvida (§4.5)
+mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache   # §4.10
+cp -R public/build/. build/             # §4.5
+cp -R public/js/filament/. js/filament/ # §4.8
+cp -R public/css/filament/. css/filament/
+cp deploy/root/.htaccess .htaccess       # §4.9
+sed "s#__DIR__\.'/\.\./#__DIR__.'/#g" public/index.php > index.php
 export COMPOSER_HOME=/home/salvxkld/.composer
 php /home/salvxkld/bin/composer install --no-dev --optimize-autoloader --no-interaction
 php artisan migrate --force
@@ -79,9 +85,11 @@ chmod -R 775 storage bootstrap/cache && chmod 600 .env
 
 ---
 
-## 4. ⚠️ Las cinco trampas de este servidor
+## 4. ⚠️ Las trampas de este servidor
 
-Ya costaron tiempo en `isp-core`. Están prohibidas.
+Las primeras cinco ya costaron tiempo en `isp-core`. Las cinco últimas
+aparecieron desplegando este proyecto. Todas están automatizadas en
+`deploy.ps1`, que **falla** si alguna se cumple.
 
 ### 4.1 `Specified key was too long` (error 1071)
 
@@ -125,6 +133,55 @@ cp -R public/build/. build/
 ```
 
 `deploy.ps1` lo hace y además **falla si los hashes no coinciden**.
+
+### 4.8 Filament publica sus assets en `public/` y el docroot sirve la raíz
+
+Sin copiar, el panel de Filament entra **sin estilos y sin JavaScript**: la
+página carga pero ningún botón responde.
+
+```bash
+cp -R public/js/filament/. js/filament/
+cp -R public/css/filament/. css/filament/
+```
+
+### 4.9 🔴 Sin `.htaccess` ni `index.php` en la raíz, el código queda expuesto
+
+Esta es la más grave. Con el docroot apuntando a la raíz del proyecto,
+`vendor/autoload.php`, `config/database.php`, `storage/logs/laravel.log`,
+`composer.json` y `.env` **se descargan con un 200**. Cualquiera que sepa la
+URL puede leer la contraseña de la base de datos.
+
+Lo que pasó en el primer despliegue de este proyecto: todo lo demás funcionaba
+y estos archivos daban 200. El `.htaccess` de `public/` no protege nada cuando el
+docroot es la raíz.
+
+```bash
+cp deploy/root/.htaccess .htaccess
+sed "s#__DIR__\.'/\.\./#__DIR__.'/#g" public/index.php > index.php
+```
+
+**Verificalo siempre.** Si alguno de estos deja de dar 403, se filtró un
+secreto:
+
+```bash
+curl -sI https://demo.salvanovasolutions.online/sistema-restaurante-global/.env | head -1   # 403
+curl -sI https://demo.salvanovasolutions.online/sistema-restaurante-global/config/database.php | head -1   # 403
+curl -sI https://demo.salvanovasolutions.online/sistema-restaurante-global/storage/logs/laravel.log | head -1   # 403
+```
+
+### 4.10 Faltan las carpetas de `storage/`
+
+Git no versiona carpetas vacías, así que `storage/framework/*` y `storage/logs`
+no llegan en el tar. Composer aborta antes de empezar:
+
+```
+Please provide a valid cache path.
+```
+
+```bash
+mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions \
+         storage/framework/testing storage/framework/views storage/logs bootstrap/cache
+```
 
 ---
 

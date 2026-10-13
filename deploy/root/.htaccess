@@ -1,0 +1,70 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .htaccess de la RAÍZ del proyecto.
+#
+# En este hosting el docroot es la raíz del proyecto y no `public/`, porque
+# cPanel compartido no permite cambiar el docroot por SSH y la aplicación vive
+# dentro de una carpeta compartida con otros 17 proyectos. Consecuencia: `app/`,
+# `vendor/`, `config/` y `.env` quedan al lado del contenido público y son
+# descargables por el navegador si no se niegan aquí explícitamente.
+#
+# Por eso este archivo, y no el de `public/`, es el que aplica.
+#
+# OJO: el `tar -xzf` del deploy pisa este archivo. Si desaparece, vuelve a estar
+# expuesta la contraseña de la base. `deploy.ps1` verifica con curl que /.env
+# siga dando 403.
+#
+# RewriteBase: la app vive en el subdirectorio /sistema-restaurante-global.
+# Si cambia el nombre de la carpeta, cambia esto también.
+# ─────────────────────────────────────────────────────────────────────────────
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /sistema-restaurante-global/
+
+    # ── El código y los secretos nunca se sirven ─────────────────────────────
+    # 403 antes de que LiteSpeed decida qué hacer con ellos.
+    RewriteRule ^(app|bootstrap|config|database|lang|resources|routes|storage|tests|vendor|deploy)/ - [F,L]
+    RewriteRule ^(\.env|\.env\..*|composer\.(json|lock)|package\.json|package-lock\.json|phpunit\.xml|phpstan\.neon|vite\.config\.js|artisan|\.git.*|\.editorconfig|\.user\.ini)$ - [F,L]
+
+    # Documentación y configuración interna: tampoco son públicos.
+    RewriteRule ^(specs|docs)/ - [F,L]
+    RewriteRule \.(md|log|sql|bak)$ - [F,L]
+
+    # Logs y vistas compiladas, que son los que más información filtran.
+    RewriteRule ^storage/(framework/views|logs)/ - [F,L]
+
+    # ── Archivos reales se sirven tal cual (build/, css/, js/) ───────────────
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # ── Todo lo demás va al front controller ────────────────────────────────
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Algunos servidores no pasan por mod_rewrite para archivos que existen.
+<IfModule mod_authz_core.c>
+    <FilesMatch "^\.env">
+        Require all denied
+    </FilesMatch>
+    <FilesMatch "^(composer\.(json|lock)|package\.json|package-lock\.json|phpunit\.xml|phpstan\.neon|vite\.config\.js|artisan|\.user\.ini)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    <FilesMatch "^\.env">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_negotiation.c>
+    Options -MultiViews -Indexes
+</IfModule>
