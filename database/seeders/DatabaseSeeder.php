@@ -9,6 +9,10 @@ use Illuminate\Database\Seeder;
  *
  * Los roles van antes que los usuarios porque asignar un rol a alguien que no
  * existe deja una fila huérfana en la tabla de permisos.
+ *
+ * La tasa de cambio va antes que el historial de ventas porque el historial
+ * guarda la tasa congelada de cada cuenta; sembrarlo sin tasas deja 4.000
+ * documentos con una tasa de ejemplo y la pantalla de facturación mintiendo.
  */
 class DatabaseSeeder extends Seeder
 {
@@ -19,7 +23,10 @@ class DatabaseSeeder extends Seeder
             RolesSeeder::class,
             ParametrosSeeder::class,
             UsuariosDemoSeeder::class,
+            TasaCambioSeeder::class,
+            ReservacionesSeeder::class,
             HistorialVentasSeeder::class,
+            ComandasAbiertasSeeder::class,
         ]);
 
         $this->command->newLine();

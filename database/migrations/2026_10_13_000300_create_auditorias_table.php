@@ -23,7 +23,16 @@ return new class extends Migration
             $table->string('actor_nombre', 120)->nullable();
             $table->string('accion', 120);
 
-            $table->string('entidad', 191);
+            /*
+             * `entidad` y `entidad_id` están en un índice compuesto, y ese es el lugar donde
+             * se cuela la trampa 1071 del servidor: con utf8mb4 cada carácter ocupa 4 bytes
+             * y el límite del índice es 1000 bytes por columna. Con 191 + 64 = 255
+             * caracteres el índice pide 1020 bytes y la migración falla.
+             *
+             * Con 120 + 64 = 184 son 736 bytes, y 120 caracteres sobran para el nombre de
+             * una clase. El nombre de la entidad va en la columna, no en el índice.
+             */
+            $table->string('entidad', 120);
             $table->string('entidad_id', 64);
 
             $table->json('antes')->nullable();

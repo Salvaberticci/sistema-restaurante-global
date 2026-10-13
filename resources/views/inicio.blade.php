@@ -72,26 +72,28 @@
         <section id="modulos" class="mt-28">
             <h2 class="text-center text-3xl font-semibold tracking-tight">Módulos</h2>
             <p class="mx-auto mt-3 max-w-xl text-center text-neutral-400">
-                Trece áreas que se usan todos los días. El backoffice en Filament,
-                la operación en Livewire.
+                Catorce áreas que se usan todos los días. El backoffice en Filament,
+                la operación en Livewire. Cada tarjeta dice en qué estado está y
+                lleva a su pantalla.
             </p>
 
             <div class="srg-escalonado mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ([
-                    ['Operación', 'Mesas y salón, comandas desde la tablet y pantalla de cocina en vivo.', 'heroicon-o-signal', true],
-                    ['Punto de venta', 'Cobro con pago mixto en bolívares y divisas, con IVA e IGTF calculados al momento.', 'heroicon-o-credit-card', true],
-                    ['Pantalla de cocina', 'Los tickets llegan solos, con semáforo de tiempo y alerta sonora.', 'heroicon-o-fire', false],
-                    ['Menú digital', 'El mismo menú que ve el cliente y que cobra el cajero.', 'heroicon-o-book-open', true],
-                    ['Facturación', 'Documentos fiscales, notas de crédito y reportes X y Z.', 'heroicon-o-document-text', false],
-                    ['Tasa de cambio', 'Bolívares en vivo y conversión congelada en cada documento.', 'heroicon-o-arrows-right-left', false],
-                    ['Reservaciones', 'Eventos y cursos, pagados 100% por adelantado.', 'heroicon-o-calendar-days', false],
-                    ['Inventario', 'Recetas por plato, kardex y alertas de stock.', 'heroicon-o-cube', true],
-                    ['Estadísticas', 'Ventas por día, por hora, por método de pago y utilidad real.', 'heroicon-o-chart-bar', false],
-                    ['Roles', 'Cinco roles con alcances distintos y todo cambio auditado.', 'heroicon-o-shield-check', true],
-                    ['Catálogos', 'Productos, insumos, alícuotas y métodos de pago.', 'heroicon-o-rectangle-stack', true],
-                    ['Auditoría', 'Quién cambió qué, cuándo y desde dónde.', 'heroicon-o-clipboard-document-list', false],
-                    ['Parámetros', 'Tasas y políticas editables sin tocar código.', 'heroicon-o-adjustments-horizontal', true],
-                ] as $i => [$titulo, $texto, $icono, $listo])
+                    ['Operación', 'Mesas y salón, comandas desde la tablet y pantalla de cocina en vivo.', 'heroicon-o-signal', '/cocina', true],
+                    ['Punto de venta', 'Cobro con pago mixto en bolívares y divisas, con IVA e IGTF calculados al momento.', 'heroicon-o-credit-card', null, false],
+                    ['Pantalla de cocina', 'Los tickets llegan solos, con semáforo de tiempo y alerta sonora.', 'heroicon-o-fire', '/cocina', true],
+                    ['Menú digital', 'El mismo menú que ve el cliente y que cobra el cajero.', 'heroicon-o-book-open', null, false],
+                    ['Facturación', 'Documentos fiscales, notas de crédito y reportes X y Z.', 'heroicon-o-document-text', '/admin/documentos-fiscales', true],
+                    ['Tasa de cambio', 'Bolívares en vivo y conversión congelada en cada documento.', 'heroicon-o-arrows-right-left', '/admin/tasas-cambio', true],
+                    ['Reservaciones', 'Eventos y cursos, pagados 100% por adelantado.', 'heroicon-o-calendar-days', '/admin/reservaciones', true],
+                    ['Inventario', 'Recetas por plato, kardex y alertas de stock.', 'heroicon-o-cube', null, false],
+                    ['Estadísticas', 'Ventas por día, por hora, por método de pago y utilidad real.', 'heroicon-o-chart-bar', '/admin/estadisticas', true],
+                    ['Ventas', 'Cuentas cobradas con su comanda, sus cortes y sus impuestos.', 'heroicon-o-receipt-percent', '/admin/ventas', true],
+                    ['Roles', 'Cinco roles con alcances distintos y todo cambio auditado.', 'heroicon-o-shield-check', '/admin/roles', true],
+                    ['Catálogos', 'Productos, insumos, alícuotas y métodos de pago.', 'heroicon-o-rectangle-stack', '/admin/productos', true],
+                    ['Auditoría', 'Quién cambió qué, cuándo y desde dónde.', 'heroicon-o-clipboard-document-list', '/admin/auditoria', true],
+                    ['Parámetros', 'Tasas y políticas editables sin tocar código.', 'heroicon-o-adjustments-horizontal', '/admin/parametros', true],
+                ] as $i => [$titulo, $texto, $icono, $enlace, $listo])
                     <div class="srg-card srg-card-hover p-5">
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10">
@@ -103,7 +105,7 @@
                                     Listo
                                 </span>
                             @else
-                                <span class="rounded-full bg-white/5 px-2 py-0.5 text-[0.65rem] font-medium text-neutral-400 ring-1 ring-white/10">
+                                <span class="rounded-full bg-amber-500/10 px-2 py-0.5 text-[0.65rem] font-medium text-amber-300 ring-1 ring-amber-500/20">
                                     En obra
                                 </span>
                             @endif
@@ -111,6 +113,19 @@
 
                         <h3 class="mt-4 font-semibold">{{ $titulo }}</h3>
                         <p class="mt-1 text-sm leading-relaxed text-neutral-400">{{ $texto }}</p>
+
+                        {{-- Cada tarjeta dice adónde va. Una lista de trece módulos
+                             sin un solo enlace obliga a que sea el usuario el que
+                             adivine dónde está cada cosa. --}}
+                        @if ($listo && $enlace)
+                            <a
+                                href="{{ url($enlace) }}"
+                                class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-amber-400 transition hover:text-amber-300"
+                            >
+                                Ver módulo
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
+                        @endif
                     </div>
                 @endforeach
             </div>

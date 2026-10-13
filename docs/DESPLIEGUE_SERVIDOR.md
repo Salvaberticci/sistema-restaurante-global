@@ -21,7 +21,7 @@ desplegar y dar mantenimiento.
 | **Composer** | `/home/salvxkld/bin/composer` |
 | **Usuario SSH** | `salvxkld` · **puerto 21098** · llave `id_rsa_cpanel` |
 | **PHP (CLI)** | `/usr/local/bin/php` (8.2.34) |
-| **Base de datos** | `salvxkld_srg` (usuario `salvxkld_salvatore`, compartido) |
+| **Base de datos** | `salvxkld_restaurante` (usuario `salvxkld_salvatore`, compartido) |
 | **Repo** | `git@github.com:Salvaberticci/sistema-restaurante-global.git` (**privado**) |
 
 ### Cuentas demo

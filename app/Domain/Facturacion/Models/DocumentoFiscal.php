@@ -3,9 +3,10 @@
 namespace App\Domain\Facturacion\Models;
 
 use App\Domain\Ordenes\Models\Orden;
-use App\Domain\Shared\ValueObjects\Decimal;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Documento fiscal emitido. Invariante I3: append-only.
@@ -17,10 +18,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property string $tipo
  * @property string $estado
+ * @property string $serie
+ * @property int|null $numero
+ * @property string $idempotency_key
  * @property string|null $numero_fiscal
  * @property string|null $serial
+ * @property int|null $contador
+ * @property string|null $hash
  * @property string $moneda
- * @property Decimal|null $total
+ * @property string|null $fecha_fiscal
+ * @property int $intentos
+ * @property array<string, mixed>|null $iva_por_alicuota
+ * @property array<string, mixed>|null $igtf_por_perfil
+ * @property array<int, mixed>|null $pagos
+ * @property array<string, mixed>|null $cliente_snapshot
+ * @property array<int, mixed>|null $ordenes_origen
+ * @property array<string, mixed>|null $documento_payload
+ * @property array<string, mixed>|null $resultado_emisor
+ * @property Carbon|null $fecha
+ * @property Carbon|null $emitido_en
  */
 class DocumentoFiscal extends Model
 {
@@ -68,6 +84,20 @@ class DocumentoFiscal extends Model
     public function padre(): BelongsTo
     {
         return $this->belongsTo(self::class, 'documento_padre_id');
+    }
+
+    /**
+     * Quién emitió el documento.
+     *
+     * Queda registrado aunque el usuario después se borre de la base: por eso
+     * además existe `numero_fiscal` y `serial`, que son del emisor. Borrar al
+     * empleado no puede dejar un documento sin origen.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function scopeEmitidos($query)

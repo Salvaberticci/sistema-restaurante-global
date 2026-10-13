@@ -9,9 +9,14 @@ use App\Domain\Configuracion\Services\ParametrosBd;
 use App\Domain\Facturacion\Contracts\FiscalDocumentDriver;
 use App\Domain\Facturacion\Drivers\SimulatedFiscalDriver;
 use App\Domain\Shared\Support\FechaFiscal;
+use Filament\Facades\Filament;
+use Filament\Infolists\Infolist;
+use Filament\Tables\Table;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Builder as SchemaBuilder;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 
@@ -63,7 +68,54 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
 
+        $this->numerosEnFormatoAmericano();
+
+        $this->loginEsElDeFilament();
+
         $this->forzarHttpsEnProduccion();
+    }
+
+    /**
+     * A dónde va quien llega sin sesión: al login de Filament.
+     *
+     * El middleware `auth` redirige a la ruta llamada `login`. En este proyecto
+     * esa ruta no existe —el login es el de Filament, que se llama
+     * `filament.admin.auth.login`— así que sin esto abrir `/cocina` sin sesión
+     * termina en una excepción en vez de en la pantalla de acceso.
+     *
+     * El panel se pide explícitamente y no con `getCurrentPanel()`, porque fuera
+     * del panel —precisamente donde hace falta redirigir— `getLoginUrl()`
+     * devuelve `null` y se vuelve a caer en la ruta inexistente.
+     *
+     * Es la forma más incómoda de fallar que hay: un error 500 en la puerta de
+     * entrada, en la primera pantalla que el usuario toca.
+     */
+    private function loginEsElDeFilament(): void
+    {
+        Authenticate::redirectUsing(fn () => Filament::getPanel('admin')->getLoginUrl());
+    }
+
+    /**
+     * Los importes se presentan como `$110.00`, no como `110,00 US$`.
+     *
+     * Con el locale `es`, `Number::currency` devuelve `110,00 US$`, y entonces las
+     * tablas de Filament y las gráficas del panel dicen el mismo número de dos
+     * formas distintas. Frente a un cliente eso no parece un detalle de formato:
+     * parece que un número está mal.
+     *
+     * En Venezuela el dólar se escribe `$110.00`, así que el formato americano es
+     * además el correcto. Y no basta con `Number::useLocale()`: Filament usa su
+     * propio estático y, si está en `null`, cae en `config('app.locale')` — o sea,
+     * que hay que tocar los dos.
+     *
+     * Las fechas no se ven afectadas porque el proyecto las pide siempre
+     * explícitas (`d/m/Y`); el locale `es` sigue sirviendo para los textos.
+     */
+    private function numerosEnFormatoAmericano(): void
+    {
+        Number::useLocale('en');
+        Table::$defaultNumberLocale = 'en';
+        Infolist::$defaultNumberLocale = 'en';
     }
 
     /**

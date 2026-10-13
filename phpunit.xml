@@ -42,5 +42,16 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!--
+            La app corre en la RAÍZ durante las pruebas. El `.env` de desarrollo
+            la pone en `sistema-restaurante-global/public` porque XAMPP la sirve
+            desde un subdirectorio, y si las pruebas heredan ese valor todas las
+            URLs de Filament y de Livewire dan 404. El prefijo se prueba aparte,
+            en la verificación de despliegue contra el servidor real.
+        -->
+        <env name="APP_URL" value="http://localhost"/>
+        <env name="APP_SUBDIRECTORIO" value=""/>
+        <env name="ASSET_URL" value="http://localhost"/>
+        <env name="SESSION_PATH" value="/"/>
     </php>
 </phpunit>

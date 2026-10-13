@@ -237,6 +237,11 @@ if [ ! -f .env ]; then
 fi
 cp .env .env.bak
 
+# `tar -xzf` sobrescribe pero NO borra. Una migración que se eliminó del repo
+# seguiría en el servidor y Laravel volvería a correrla, dejando tablas que ya no
+# existen en el código. Por eso las migraciones se limpian antes de extraer.
+rm -f database/migrations/*.php
+
 tar -xzf __TAR__
 
 # Git no versiona carpetas vacias, asi que storage/framework y storage/logs no
@@ -269,6 +274,7 @@ export COMPOSER_HOME=__HOME__/.composer
 php __HOME__/bin/composer install --no-dev --optimize-autoloader --no-interaction
 
 php artisan migrate --force
+__SEMILLA__
 
 # route:cache rompe la raiz con 405 en este hosting. route:clear, siempre.
 php artisan route:clear
@@ -289,6 +295,12 @@ $homeUsuario = "/home/$Usuario"
 $instalar = $instalar.Replace('__RUTA__', $RutaRemota)
 $instalar = $instalar.Replace('__TAR__', "$homeUsuario/$nombreRemoto")
 $instalar = $instalar.Replace('__HOME__', $homeUsuario)
+
+# Sembrar es opcional porque `db:seed` sobre una base ya sembrada duplica
+# catálogos y ensucia el demo. Solo entra en la primera carga o a petición
+# expresa, y por eso no viene dentro de la ruta normal del deploy.
+$semilla = if ($Semillar) { 'php artisan db:seed --force' } else { '' }
+$instalar = $instalar.Replace('__SEMILLA__', $semilla)
 
 $salidaInstalar = InvocarSsh -Script $instalar -Descripcion 'Extrayendo, instalando y migrando'
 
@@ -315,12 +327,19 @@ if ($SinVerificar) {
         param([string]$Ruta, [string]$Esperado, [string]$Etiqueta)
 
         try {
-            $codigo = (Invoke-WebRequest -Uri "$base$Ruta" -Method Head -MaximumRedirection 5 -UseBasicParsing -ErrorAction Stop).StatusCode
+            $codigo = (Invoke-WebRequest -Uri "$base$Ruta" -Method Head -MaximumRedirection 0 -UseBasicParsing -ErrorAction Stop).StatusCode
         } catch {
             $codigo = [int]$_.Exception.Response.StatusCode
         }
 
-        if ("$codigo" -eq $Esperado) {
+        # '302|200' acepta cualquiera de los dos: sirve donde la respuesta
+        # depende de si hay sesión iniciada.
+        if ($Esperado -eq '302|200') {
+            if ("$codigo" -in @('302', '200')) {
+                SayOk "$Etiqueta ($codigo)"
+                return $true
+            }
+        } elseif ("$codigo" -eq $Esperado) {
             SayOk "$Etiqueta ($codigo)"
             return $true
         }
@@ -331,15 +350,22 @@ if ($SinVerificar) {
 
     $fallos = @()
 
-    # La trampa 4: route:cache devuelve 405 y Laravel por consola sigue bien.
-    $fallos += ,(-not (Comprobar '/' '302' 'La raiz responde'))
+    # La raíz es la landing pública y debe responder 200. El 405 es el síntoma
+    # de `route:cache`, que está prohibido en este hosting (AGENTS.md §4.4).
+    $fallos += ,(-not (Comprobar '/' '200' 'La landing publica responde'))
 
-    $fallos += ,(-not (Comprobar '/login' '200' 'El login carga'))
+    $fallos += ,(-not (Comprobar '/admin/login' '200' 'El login del panel carga'))
 
     # Trampa 5: el navegador pide /build/, no /public/build/.
     $fallos += ,(-not (Comprobar '/build/manifest.json' '200' 'El manifest de Vite existe'))
 
-    $fallos += ,(-not (Comprobar '/livewire/livewire.js' '200' 'Livewire responde'))
+    # En el servidor solo se registra el archivo que corresponde al modo actual:
+    # Livewire cambia de nombre entre debug y producción y no publica los dos.
+    $fallos += ,(-not (Comprobar '/livewire/livewire.min.js' '200' 'Livewire responde'))
+
+    # El panel exige sesión: sin ella redirige al login. Con sesión devuelve la
+    # página, así que se aceptan las dos.
+    $fallos += ,(-not (Comprobar '/admin' '302|200' 'El panel responde'))
 
     # Los secretos nunca se sirven.
     $fallos += ,(-not (Comprobar '/.env' '403' '.env bloqueado'))
@@ -349,7 +375,7 @@ if ($SinVerificar) {
     # Cabeceras de seguridad: el .htaccess de la raiz es el que aplica y el
     # tar puede pisarlo.
     try {
-        $cabeceras = (Invoke-WebRequest -Uri "$base/login" -UseBasicParsing).Headers
+        $cabeceras = (Invoke-WebRequest -Uri "$base/admin/login" -UseBasicParsing).Headers
         if ($cabeceras['X-Frame-Options'] -ne 'SAMEORIGIN') {
             SayKo 'Faltan cabeceras de seguridad (el .htaccess de la raiz fue pisado)'
             $fallos += $true

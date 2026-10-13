@@ -6,10 +6,10 @@ use App\Domain\Facturacion\Models\DocumentoFiscal;
 use App\Domain\Ordenes\Enums\Canal;
 use App\Domain\Ordenes\Enums\EstadoOrden;
 use App\Models\User;
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * Lo que pidió una mesa y terminó en cuenta.
@@ -20,11 +20,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 /**
  * @property string $numero
- * @property CarbonImmutable $abierta_at
- * @property CarbonImmutable|null $cerrada_at
- * @property CarbonImmutable|null $cobrada_at
- * @property string $estado
+ * @property Carbon $abierta_at
+ * @property Carbon|null $cerrada_at
+ * @property Carbon|null $cobrada_at
+ * @property EstadoOrden $estado
  * @property Canal $canal
+ * @property int|null $comensales
+ * @property string $metodo_pago
+ * @property string $moneda
+ * @property string $total
  */
 class Orden extends Model
 {

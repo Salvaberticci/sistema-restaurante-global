@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Domain\Iam\Permisos;
+use App\Filament\Navegacion;
 use App\Filament\Widgets\ActividadReciente;
 use App\Filament\Widgets\BannerDemo;
 use App\Filament\Widgets\PorMetodoPago;
@@ -15,6 +17,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -55,6 +58,21 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
+            ])
+            // El orden de los grupos está declarado en un solo archivo
+            // (`App\Filament\Navegacion`). Pensado para el recorrido del día: lo
+            // que se usa a diario arriba, la configuración al final.
+            ->navigationGroups(Navegacion::grupos())
+            // La pantalla de cocina no es un recurso del panel: es una pantalla
+            // completa que vive fuera (invariante I7), pero necesita un enlace
+            // para que quien entra al panel la encuentre.
+            ->navigationItems([
+                NavigationItem::make('Pantalla de cocina')
+                    ->url('/cocina')
+                    ->icon('heroicon-o-fire')
+                    ->group(Navegacion::OPERACION)
+                    ->sort(1)
+                    ->visible(fn () => auth()->user()?->can(Permisos::COCINA_VER) ?? false),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
