@@ -1,0 +1,20 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - database
+        - routes
+
+    level: 5
+
+    excludePaths:
+        - app/Http/Middleware (?)
+        - app/Providers/Filament/*
+        - storage/*
+        - vendor/*
+
+    checkModelProperties: true
+    checkOctaneCompatibility: true
+    reportUnmatchedIgnoredErrors: false
